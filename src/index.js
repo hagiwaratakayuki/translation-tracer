@@ -192,9 +192,7 @@ async function logstat(options){
 
 
     }
-    else{
-      continue;
-    }
+  
     if(verbose === true){
       console.log(translatedFile, status, score,extra);
     }
