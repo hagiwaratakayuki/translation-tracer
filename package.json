@@ -1,0 +1,19 @@
+{
+  "name": "trancelation-tracer",
+  "version": "1.0.0",
+  "description": "trace change in version control system based trancelation",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "csv": "^5.5.0",
+    "dayjs": "^1.10.4",
+    "meow": "^9.0.0"
+  },
+  "bin": {
+    "translation-tracer": "./src/cli.js"
+  }
+}
