@@ -1,19 +1,28 @@
 {
   "name": "trancelation-tracer",
-  "version": "1.0.0",
-  "description": "trace change in version control system based trancelation",
+  "version": "1.0.1",
+  "description": "trace change in version control system based translation",
   "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+
   },
-  "author": "",
+  "bugs":{
+    "url":"https://github.com/hagiwaratakayuki/translation-tracer/issues"
+  },
+  "author": "hagiwara takayuki",
   "license": "MIT",
   "dependencies": {
     "csv": "^5.5.0",
     "dayjs": "^1.10.4",
     "meow": "^9.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hagiwaratakayuki/translation-tracer"
+  },
+  "homepage": "https://github.com/hagiwaratakayuki/translation-tracer#readme",
   "bin": {
     "translation-tracer": "./src/cli.js"
-  }
+  },
+  "keywords": ["cli", "git", "translation", "document"]
 }
