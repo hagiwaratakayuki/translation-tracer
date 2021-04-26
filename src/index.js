@@ -166,13 +166,18 @@ async function logstat(options){
     if(translatedStamp.renameFrom){
       let fromTranslatedFile = translatedStamp.renameFrom.file;
       let fromTranslatedStamp= translatedStamps[fromTranslatedFile];
-      
+      let isContinue = false;
+
       while(fromTranslatedStamp.renameFrom){
         fromTranslatedFile = fromTranslatedStamp.renameFrom.file;
-        fromTranslatedStamp= translatedStamps[fromTranslatedFile]
+        fromTranslatedStamp= translatedStamps[fromTranslatedFile];
+        let fromContentFile = replacePath(translatedPath, contentPath, fromTranslatedFile);
+        if(contentStamps[fromContentFile] ){
+          isContinue = true;
+          break;
+        }
       }
-      let fromContentFile = replacePath(translatedPath, contentPath, fromTranslatedFile);
-      if(contentStamps[fromContentFile] ){
+      if (isContinue === true) {
         continue;
       }
 
