@@ -13,9 +13,9 @@ const dayjs = require('dayjs');
 async function logstat(options){
 
 
-  const defaultOptions = {
-                            contentRepository:'./content',
-                            trancelatedRepository:'./translated-content',
+  const defaulfromptions = {
+                            contentReposifromry:'./content',
+                            trancelatedReposifromry:'./translated-content',
                             contentPath:'files/en-us',
                             translatedPath:'files/ja',
                             resultFile:"./trancelate-status.csv",
@@ -23,9 +23,9 @@ async function logstat(options){
                             verbose:true
                           }
 
-  const {contentRepository, trancelatedRepository, contentPath, translatedPath, resultFile, verbose, exts} = Object.assign({}, defaultOptions, options);
-  const contentStamps = await tracer(contentRepository);
-  const translatedStamps = await tracer(trancelatedRepository);
+  const {contentReposifromry, trancelatedReposifromry, contentPath, translatedPath, resultFile, verbose, exts} = Object.assign({}, defaulfromptions, options);
+  const contentStamps = await tracer(contentReposifromry);
+  const translatedStamps = await tracer(trancelatedReposifromry);
 
   let headers = ['file', 'status', 'score', 'extra'];
   let statuses = {};
@@ -52,74 +52,66 @@ async function logstat(options){
         status = 'not delete';
         score = contentStamp['delete']
       }
-      else if(contentStamp.renameTo ){
+      else if (contentStamp.renameTo){
+        continue;
+      }
+      else if(!translatedStamp){
+        if(!contentStamp.renameFrom){
 
-
-        let toTranslatedFile = replacePath(contentPath, translatedPath,  contentStamp.renameTo.file);
-        let toTranslatedStamp = translatedStamps[toTranslatedFile];
-        let toContentStamp = contentStamps[contentStamp.renameTo.file];
-
-        if(toContentStamp && toTranslatedStamp){
-
-            continue
-
-
-        }
-
-
-        if(translatedStamp){
-          if (translatedStamp.renameTo){
-              if(translatedStamp.renameTo.file === toTranslatedFile){
-
-
-                continue
-              }
-
-              score = contentStamp.renameTo.similarity;
-              extra =  translatedStamp.renameTo.file
-              contentFile = contentStamp.renameTo.file;
-              status = 'rename mistake';
-
-
-
-          }
-          else{
-
-            score = contentStamp.renameTo.similarity;
-            extra = translatedFile
-            contentFile = contentStamp.renameTo.file;
-            status = 'not renamed';
-          }
-
-
-
-        }
-        else if(!toTranslatedStamp ){
-          if(toContentStamp){
-              continue;
-          }
           status = 'not translated';
-          extra = '';
-          score = contentStamp.lastModified || contentStamp.create;
-          contentFile = contentStamp.renameTo.file;
+          score =  contentStamp.lastModified || contentStamp.create
 
         }
         else{
-          continue;
-        }
+          let fromContentFile = contentStamp.renameFrom.file
+          let fromContentStamp = contentStamps[fromContentFile];
+          let fromContentFiles = [fromContentFile];
 
-      }
-      else if(!translatedStamp){
-        if(statuses[contentFile]){
-          continue;
-        }
-        status = 'not translated';
-        score =  contentStamp.lastModified || contentStamp.create
 
+          while(fromContentStamp.renameFrom){
+            fromContentFile = contentStamp.renameFrom.file;
+            rootContentFile = fromContentFile;
+            fromContentStamp = contentStamps[fromContentFile];
+            fromContentFiles.push(fromContentFile);
+          }
+          let fromTranslatedFile, fromTranslatedStamp, nodeContentStamp;
+          for (let fromContentFile of fromContentFiles) {
+            nodeContentStamp = contentStamps[fromContentFile];
+            fromTranslatedFile = replacePath(contentPath, translatedPath,  fromContentFile);
+            fromTranslatedStamp = translatedStamps[fromTranslatedFile];
+            if(fromTranslatedStamp){
+              break;
+            }
+
+          }
+          if(!fromTranslatedStamp){
+            status = 'not translated';
+            score =  contentStamp.lastModified || contentStamp.create;
+          }
+          else if(!fromTranslatedStamp.renameTo){
+            status = 'not renamed';
+            score = nodeContentStamp.renameTo.similarity;
+            extra = fromTranslatedFile;
+          }
+          else{
+            status = 'rename mistake';
+            score = nodeContentStamp.renameTo.similarity
+
+            let startTranslatedFile = fromTranslatedFile;
+            let toTranslateFile = fromTranslatedStamp.renameTo.file;
+            let toTranslateStamp = translatedStamps[toTranslateFile];
+            while(toTranslateStamp.renameTo){
+              toTranslateFile = toTranslateStamp.renameTo.file
+              toTranslateStamp = translatedStamps[toTranslateFile];
+            }
+            extra = [toTranslateFile, startTranslatedFile].join(' ')
+
+          }
+        }
       }
       else if(!contentStamp['delete'] && translatedStamp['delete']){
         status = 'miss delete';
-        score = translatedStamp['delete']
+        score = translatedStamp['delete'];
       }
       else if(contentStamp.lastModified){
 
@@ -164,35 +156,40 @@ async function logstat(options){
       continue;
     }
     if(translatedStamp.renameTo){
-      if(translatedStamps[translatedStamp.renameTo.file] || contentStamps[replacePath(translatedPath, contentPath, translatedStamp.renameTo.file)]){
+      continue;
+
+    }
+
+
+
+
+    if(translatedStamp.renameFrom){
+      let fromTranslatedFile = translatedStamp.renameFrom.file;
+      let fromTranslatedStamp= translatedStamps[fromTranslatedFile];
+      
+      while(fromTranslatedStamp.renameFrom){
+        fromTranslatedFile = fromTranslatedStamp.renameFrom.file;
+        fromTranslatedStamp= translatedStamps[fromTranslatedFile]
+      }
+      let fromContentFile = replacePath(translatedPath, contentPath, fromTranslatedFile);
+      if(contentStamps[fromContentFile] ){
         continue;
       }
 
-      status = 'translated filename mistake or base file deleted';
-      score = translatedStamp.renameTo.similarity
-      extra = translatedFile
-      translatedFile = translatedStamp.renameTo.file;
 
-
+      extra = fromTranslatedFile;
+      score = fromTranslatedStamp.renameTo.similarity;
     }
-    else {
-      status = 'translated filename mistake or base file deleted';
-
-      if(translatedStamp.renameFrom){
-        let fromContentFile = replacePath(translatedPath, contentPath, translatedStamp.renameFrom.file);
-        if(contentStamps[fromContentFile] ){
-          continue;
-        }
-
-        extra = translatedStamp.renameFrom.file;
-        score = translatedStamp.renameFrom.similarity;
-      }
-
-
-
-
+    else{
+      score = translatedStamp.lastModified || translatedStamp.create
     }
-  
+    status = 'translated filename mistake or base file deleted';
+
+
+
+
+
+
     if(verbose === true){
       console.log(translatedFile, status, score,extra);
     }
@@ -220,7 +217,7 @@ async function logstat(options){
         return;
       }
       fs.writeFileSync(resultFile, output);
-      resolve()
+      resolve();
     })
   });
 
@@ -229,6 +226,9 @@ function replacePath(basePath, targetPath, filePath){
 
   if(basePath){
     return filePath.replace(basePath, targetPath).replace('/^\//', '');
+  }
+  if(!basePath && !targetPath){
+    return filePath;
   }
 
   return path.join([targetPath, filePath])

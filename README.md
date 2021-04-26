@@ -58,6 +58,6 @@ not translated | this file did not translated. | latest update or create time
 not delete | base file deleted but translation file did not delete | delete time
 rename mistake | rename mistake at translation file. | base file similarity | translated file name after renamed
 out of date | this file is translated but out of date | base file's last modified time
-rename mistake | translated file miss renamed  | base file similality percentage |  translated file name after renamed
-not renamed | base file renamed, but translated file did not rename | base file similality percentage | translated file name before rename
+rename mistake | translated file miss renamed  | base file similality percentage |  translated file name "after and before" renamed. 
+not renamed | base file renamed, but translated file did not rename | base file similality percentage | translated file name when base file renamed
 translated filename mistake or base file deleted | translated file exist. but base file does not exist | if this file was renamed,  file similality percentage  | if this file was renamed, filename before renamed

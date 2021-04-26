@@ -1,6 +1,6 @@
 {
-  "name": "trancelation-tracer",
-  "version": "1.0.2",
+  "name": "translation-tracer",
+  "version": "1.0.3",
   "description": "trace change in version control system based translation",
   "main": "./src/index.js",
   "scripts": {
