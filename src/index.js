@@ -18,7 +18,7 @@ async function logstat(options){
                             trancelatedReposifromry:'./translated-content',
                             contentPath:'files/en-us',
                             translatedPath:'files/ja',
-                            resultFile:"./trancelate-status.csv",
+                            resultFile:"[./trancelate-status-]YYYY-MM-DD-HH-mm-ssZZ[.csv]",
                             exts:['html', 'htm'],
                             verbose:true
                           }
@@ -221,7 +221,9 @@ async function logstat(options){
         reject(err)
         return;
       }
-      fs.writeFileSync(resultFile, output);
+
+
+      fs.writeFileSync(dayjs().format(resultFile), output);
       resolve();
     })
   });

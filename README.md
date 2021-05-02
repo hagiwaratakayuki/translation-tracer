@@ -34,7 +34,7 @@ Option Key | CLI Alias | Description | Type | Default
 --nocontentPath || flag for contentPath make void. | `boolean` | `false`
 --translatedPath ||  target path in trancelated content repository. | `string` | `files/ja`
 --notranslatedPath || flag for translatedPath make void. | `boolean` | `false`
---resultFile || filepath for log | `string` | `./trancelate-status.csv`
+--resultFile || filepath for log. templated by [day.js format](https://day.js.org/docs/en/display/format).  | `string` | `[./trancelate-status-]YYYY-MM-DD-HH-mm-ssZZ[.csv]`
 --exts | --e | target file extention(eg. html, htm). if you want set multiple, type like '-e html --e htm --e txt' | `string list` | `[html, htm]`
 --verbose | --v |  verbose flag | `boolean` | `true`
 
