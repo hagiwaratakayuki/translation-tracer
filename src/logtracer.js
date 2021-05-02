@@ -81,6 +81,7 @@ function _parse(results){
 
       fileName = splited[1];
 
+
       let log = logs[fileName] || {};
 
       if(updateType === 'M'){
@@ -94,7 +95,7 @@ function _parse(results){
 
 
       }
-      if(updateType === 'A'){
+      if(updateType === 'A' && !log.create){
         log.create = date;
       }
 

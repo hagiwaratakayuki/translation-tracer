@@ -45,12 +45,15 @@ async function logstat(options){
       let score = '';
       let extra = '';
       let translatedStamp = translatedStamps[translatedFile];
-      if(contentStamp['delete'] && !translatedStamp){
-        continue;
-      }
-      if(contentStamp['delete'] && !translatedStamp['delete']){
+
+      if(isDelete(contentStamp)){
+
+        if(!translatedStamp || isDelete(translatedStamp)){
+          continue;
+        }
+
         status = 'not delete';
-        score = contentStamp['delete']
+        score = contentStamp['delete'];
       }
       else if (contentStamp.renameTo){
         continue;
@@ -109,20 +112,21 @@ async function logstat(options){
           }
         }
       }
-      else if(!contentStamp['delete'] && translatedStamp['delete']){
+      else if(translatedStamp && isDelete(translatedStamp)){
+
+
         status = 'miss delete';
-        score = translatedStamp['delete'];
+        score =  contentStamp.lastModified || contentStamp.create;
+        extra = translatedFile;
+
+
       }
       else if(contentStamp.lastModified){
 
 
-        if(!translatedStamp.lastModified){
-          status = 'out of date';
-          score = contentStamp.lastModified;
-        }
-        else{
           let contentModified = dayjs(contentStamp.lastModified);
-          let translatedModified = dayjs(translatedStamp.lastModified);
+          let translatedModified = dayjs(translatedStamp.lastModified || contentStamp.create);
+
           if(contentModified.isAfter(translatedModified) === true) {
             status = 'out of date';
             score = contentStamp.lastModified;
@@ -132,7 +136,7 @@ async function logstat(options){
           }
 
 
-        }
+
       }
       else{
         continue;
@@ -144,7 +148,6 @@ async function logstat(options){
       statuses[contentFile] = {file:contentFile,status:status,score:score, extra:extra}
 
   }
-
   for (let translatedFile in translatedStamps) {
     let translatedStamp = translatedStamps[translatedFile];
     let contentFile = replacePath(translatedPath, contentPath, translatedFile);
@@ -202,6 +205,7 @@ async function logstat(options){
     statuses[translatedFile] = {file:translatedFile,status:status,score:score, extra:extra}
 
   }
+
   let records = [headers];
 
   for (let file in statuses) {
@@ -241,4 +245,12 @@ function replacePath(basePath, targetPath, filePath){
   return path.join([targetPath, filePath])
 
 }
+function isDelete(stamp){
+  if(!stamp['delete']){
+    return false;
+  }
+  let deleteTime = dayjs(stamp['delete']);
+  return deleteTime.isAfter(stamp.lastModified || stamp.create)
+}
+
 module.exports.logstat = logstat;
