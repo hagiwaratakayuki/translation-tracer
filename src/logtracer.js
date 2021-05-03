@@ -113,10 +113,14 @@ function _parse(results){
       let fromFile = splited[1];
       let toFile = splited[2];
       let fromLog = logs[fromFile] || {};
-      fromLog.renameTo = {date:date, file:toFile, similarity:similarity};
-
       logs[fromFile] = fromLog;
       let toLog = logs[toFile] || {};
+      if(fromLog.renameTo || toLog.renameFrom){
+        continue;
+      }
+      fromLog.renameTo = {date:date, file:toFile, similarity:similarity};
+
+
       toLog.renameFrom = {date:date, file:fromFile, similarity:similarity}
       if(!toLog.lastModified){
         toLog.lastModified = fromLog.lastModified;

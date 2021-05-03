@@ -1,7 +1,7 @@
 
 const fs = require('fs');
 const path = require('path');
-
+const matcher = require('matcher');
 
 const tracer = require('./logtracer');
 const stringify = require('csv-stringify');
@@ -20,10 +20,11 @@ async function logstat(options){
                             translatedPath:'files/ja',
                             resultFile:"[./trancelate-status-]YYYY-MM-DD-HH-mm-ssZZ[.csv]",
                             exts:['html', 'htm'],
+                            targetDir:[],
                             verbose:true
                           }
 
-  const {contentReposifromry, trancelatedReposifromry, contentPath, translatedPath, resultFile, verbose, exts} = Object.assign({}, defaulfromptions, options);
+  const {contentReposifromry, trancelatedReposifromry, contentPath, translatedPath, resultFile, verbose, targetDir, exts} = Object.assign({}, defaulfromptions, options);
   const contentStamps = await tracer(contentReposifromry);
   const translatedStamps = await tracer(trancelatedReposifromry);
 
@@ -33,9 +34,24 @@ async function logstat(options){
 
   for (let contentFile in contentStamps) {
 
-      if((contentPath && contentFile.indexOf(contentPath) !== 0) || exts.indexOf(contentFile.split('.').pop()) === -1) {
+      if (targetDir.length > 0){
 
-        continue
+        let isContinue = true;
+        for (let pattern of targetDir) {
+            if(matcher.isMatch(contentFile, pattern)){
+
+              isContinue = false;
+              break;
+            }
+        }
+        if(isContinue === true){
+            continue;
+        }
+
+      }
+      if((contentPath && contentFile.indexOf(contentPath) !== 0) || (exts && exts.indexOf(contentFile.split('.').pop()) === -1)) {
+
+        continue;
       }
       let contentStamp = contentStamps[contentFile];
       let translatedFile = replacePath(contentPath, translatedPath, contentFile);
@@ -69,11 +85,18 @@ async function logstat(options){
           let fromContentFile = contentStamp.renameFrom.file
           let fromContentStamp = contentStamps[fromContentFile];
           let fromContentFiles = [fromContentFile];
+          let untiloop = {}
+          untiloop[fromContentFile] = true;
+
 
 
           while(fromContentStamp.renameFrom){
             fromContentFile = contentStamp.renameFrom.file;
             rootContentFile = fromContentFile;
+            if(untiloop[fromContentFile]){
+              break;
+            }
+            untiloop[fromContentFile] = true;
             fromContentStamp = contentStamps[fromContentFile];
             fromContentFiles.push(fromContentFile);
           }
@@ -116,7 +139,7 @@ async function logstat(options){
 
 
         status = 'miss delete';
-        score =  contentStamp.lastModified || contentStamp.create;
+        score =  contentStamp.lastModified || contentStamp.create || '';
         extra = translatedFile;
 
 
@@ -154,7 +177,22 @@ async function logstat(options){
     let contentStamp = contentStamps[contentFile];
     let score = '';
     let status;
+    let extra = '';
+    if (targetDir.length > 0){
 
+      let isContinue = true;
+      for (let pattern of targetDir) {
+          if(matcher.isMatch(translatedFile, pattern)){
+
+            isContinue = false;
+            break;
+          }
+      }
+      if(isContinue === true){
+          continue;
+      }
+
+    }
     if ((translatedPath && translatedFile.indexOf(translatedPath) !== 0) || contentStamp ||  statuses[contentFile] || exts.indexOf(translatedFile.split('.').pop()) === -1 || translatedStamp['delete']) {
       continue;
     }
@@ -250,6 +288,9 @@ function isDelete(stamp){
     return false;
   }
   let deleteTime = dayjs(stamp['delete']);
+  if(!stamp.lastModified && !stamp.create){
+    return true;
+  }
   return deleteTime.isAfter(stamp.lastModified || stamp.create)
 }
 

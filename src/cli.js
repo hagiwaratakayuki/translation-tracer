@@ -14,9 +14,11 @@ const cli = meow(`
 		--nocontentPath  flag for contentPath make void. defalut false
     --translatedPath   target path in trancelated content Repository. default files/ja
 		--notranslatedPath  flag for translatedPath make void.
-		--resultFile  filepath for log default ./trancelate-status.csv
+		--resultFile  filepath for log templated by day.js format https://day.js.org/docs/en/display/format default [./trancelate-status-]YYYY-MM-DD-HH-mm-ssZZ[.csv]
+		--targetDir -t target directry each repositry if you need(wildcard). if you want set multiple, type like '-t foo/* -e bar/*' default none.
 		--exts -e target file extention(eg. html, htm). if you want set multiple, type like '-e html -e htm -e txt' default html htm.
 		--verbose --v verbose flag
+
 	Examples
 	  $ trancelation-tracer
 
@@ -56,6 +58,11 @@ const cli = meow(`
 			type:'string',
 			isMultiple:true,
 			alias:'e'
+		},
+		targetDir:{
+			type:'string',
+			isMultiple:true,
+			alias:'t'
 		},
 		verbose:{
 			type:'boolean',
